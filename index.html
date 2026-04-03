@@ -1,357 +1,206 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Atom, 
-  Beaker, 
-  Calculator, 
-  Dna, 
-  Globe, 
-  CheckCircle2, 
-  Circle,
-  ChevronDown,
-  ChevronUp,
-  Trophy,
-  CalendarClock,
-  Moon,
-  Sun,
-  RotateCcw
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSC 2026 Progress Tracker</title>
+    <!-- Load React & Babel for in-browser compilation -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        'shimmer': 'shimmer 2s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .shimmer-effect {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+    </style>
+</head>
+<body class="transition-colors duration-300">
+    <div id="root"></div>
 
-const syllabusData = [
-  {
-    id: 'physics',
-    title: 'Physics (136)',
-    icon: Atom,
-    color: 'bg-blue-500',
-    darkColor: 'dark:bg-blue-600',
-    lightColor: 'bg-blue-100 dark:bg-blue-900/30',
-    textColor: 'text-blue-600 dark:text-blue-400',
-    topics: [
-      { id: 'p1', title: 'Physical Quantities & Measurement' },
-      { id: 'p2', title: 'Motion (Equations, Graphs, Falling Bodies)' },
-      { id: 'p3', title: 'Force (Newton\'s Laws, Momentum, Friction)' },
-      { id: 'p4', title: 'Work, Power, and Energy' },
-      { id: 'p5', title: 'Waves and Sound (Echoes, Velocity)' },
-      { id: 'p6', title: 'Reflection of Light (Mirrors, Magnification)' },
-      { id: 'p7', title: 'Static Electricity (Coulomb\'s Law, Fields)' }
-    ]
-  },
-  {
-    id: 'chemistry',
-    title: 'Chemistry (137)',
-    icon: Beaker,
-    color: 'bg-indigo-500',
-    darkColor: 'dark:bg-indigo-600',
-    lightColor: 'bg-indigo-100 dark:bg-indigo-900/30',
-    textColor: 'text-indigo-600 dark:text-indigo-400',
-    topics: [
-      { id: 'c1', title: 'Structure of Matter (Isotopes, Bohr/Rutherford)' },
-      { id: 'c2', title: 'Periodic Table (Trends, Group Properties)' },
-      { id: 'c3', title: 'Chemical Bonds (Ionic, Covalent, Octet Rule)' },
-      { id: 'c4', title: 'Mole Concept and Chemical Calculations' },
-      { id: 'c5', title: 'Chemical Reactions (Redox, Rates, Le Chatelier)' },
-      { id: 'c6', title: 'Mineral Resources: Hydrocarbons' }
-    ]
-  },
-  {
-    id: 'hmath',
-    title: 'Higher Math (126)',
-    icon: Calculator,
-    color: 'bg-purple-500',
-    darkColor: 'dark:bg-purple-600',
-    lightColor: 'bg-purple-100 dark:bg-purple-900/30',
-    textColor: 'text-purple-600 dark:text-purple-400',
-    topics: [
-      { id: 'hm1', title: 'Algebraic Expressions (Polynomials, Partial Fractions)' },
-      { id: 'hm2', title: 'Infinite Series (Geometric Series)' },
-      { id: 'hm3', title: 'Binomial Expansion (Pascal\'s Triangle)' },
-      { id: 'hm4', title: 'Trigonometry (Radians, Quadrants)' },
-      { id: 'hm5', title: 'Planar Vectors' },
-      { id: 'hm6', title: 'Exponential & Logarithmic Functions' },
-      { id: 'hm7', title: 'Coordinate Geometry (Distance, Slope, Area)' },
-      { id: 'hm8', title: 'Probability' }
-    ]
-  },
-  {
-    id: 'gmath',
-    title: 'General Math (109)',
-    icon: Calculator,
-    color: 'bg-pink-500',
-    darkColor: 'dark:bg-pink-600',
-    lightColor: 'bg-pink-100 dark:bg-pink-900/30',
-    textColor: 'text-pink-600 dark:text-pink-400',
-    topics: [
-      { id: 'gm1', title: 'Sets and Functions' },
-      { id: 'gm2', title: 'Algebraic Formulas' },
-      { id: 'gm3', title: 'Geometry (Constructions, Circle Theorems)' },
-      { id: 'gm4', title: 'Trigonometry (Ratios, Identities)' },
-      { id: 'gm5', title: 'Algebraic Ratios and Proportions' },
-      { id: 'gm6', title: 'Mensuration (Area, Volume)' },
-      { id: 'gm7', title: 'Statistics (Ogive, Central Tendency)' }
-    ]
-  },
-  {
-    id: 'biology',
-    title: 'Biology (138)',
-    icon: Dna,
-    color: 'bg-emerald-500',
-    darkColor: 'dark:bg-emerald-600',
-    lightColor: 'bg-emerald-100 dark:bg-emerald-900/30',
-    textColor: 'text-emerald-600 dark:text-emerald-400',
-    topics: [
-      { id: 'b1', title: 'Intro to Biology & Taxonomy' },
-      { id: 'b2', title: 'Cells and Tissues' },
-      { id: 'b3', title: 'Cell Division (Mitosis, Meiosis)' },
-      { id: 'b4', title: 'Bioenergetics (Photosynthesis, Respiration)' },
-      { id: 'b5', title: 'Reproduction in Organisms' },
-      { id: 'b6', title: 'Genetics and Evolution' },
-      { id: 'b7', title: 'Organisms and Environment' }
-    ]
-  },
-  {
-    id: 'bgs',
-    title: 'BGS (150)',
-    icon: Globe,
-    color: 'bg-orange-500',
-    darkColor: 'dark:bg-orange-600',
-    lightColor: 'bg-orange-100 dark:bg-orange-900/30',
-    textColor: 'text-orange-600 dark:text-orange-400',
-    topics: [
-      { id: 'bgs1', title: 'Independence of Bangladesh' },
-      { id: 'bgs2', title: 'Solar System and the Earth' },
-      { id: 'bgs3', title: 'State, Citizenship, and Law' },
-      { id: 'bgs4', title: 'National Resources and Economic Systems' },
-      { id: 'bgs5', title: 'Economic Indicators' },
-      { id: 'bgs6', title: 'Family Structure & Socialization' }
-    ]
-  }
-];
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-export default function App() {
-  // Load initial state from LocalStorage
-  const [completed, setCompleted] = useState(() => {
-    const saved = localStorage.getItem('ssc_progress_2026');
-    return saved ? JSON.parse(saved) : {};
-  });
-  
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem('ssc_theme');
-    return savedTheme === 'dark';
-  });
+        /**
+         * Fix for the icon.toSvg error:
+         * We manually construct the SVG using Lucide's data to avoid 
+         * method-based rendering issues in the browser global environment.
+         */
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const [iconMarkup, setIconMarkup] = useState(null);
 
-  const [expandedSubject, setExpandedSubject] = useState(syllabusData[0].id);
-  const [daysLeft, setDaysLeft] = useState(0);
+            useEffect(() => {
+                if (window.lucide && window.lucide.icons) {
+                    const iconData = window.lucide.icons[name];
+                    if (iconData) {
+                        // iconData[1] contains the path tags
+                        const contents = iconData[1].map(tag => {
+                            const [tagName, attrs] = tag;
+                            const attrString = Object.entries(attrs)
+                                .map(([k, v]) => `${k}="${v}"`)
+                                .join(' ');
+                            return `<${tagName} ${attrString}></${tagName}>`;
+                        }).join('');
+                        
+                        setIconMarkup(contents);
+                    }
+                }
+            }, [name]);
 
-  // Sync state to LocalStorage
-  useEffect(() => {
-    localStorage.setItem('ssc_progress_2026', JSON.stringify(completed));
-  }, [completed]);
-
-  useEffect(() => {
-    localStorage.setItem('ssc_theme', isDarkMode ? 'dark' : 'light');
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
-
-  useEffect(() => {
-    const examDate = new Date('2026-04-21T00:00:00');
-    const today = new Date();
-    examDate.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    const diffTime = examDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    setDaysLeft(diffDays > 0 ? diffDays : 0);
-  }, []);
-
-  const toggleTopic = (topicId) => {
-    setCompleted(prev => ({
-      ...prev,
-      [topicId]: !prev[topicId]
-    }));
-  };
-
-  const resetProgress = () => {
-    if (window.confirm('Are you sure you want to clear all progress?')) {
-      setCompleted({});
-    }
-  };
-
-  const getSubjectProgress = (subject) => {
-    const total = subject.topics.length;
-    const done = subject.topics.filter(t => completed[t.id]).length;
-    return { total, done, percentage: Math.round((done / total) * 100) || 0 };
-  };
-
-  const totalTopics = syllabusData.reduce((acc, sub) => acc + sub.topics.length, 0);
-  const completedCount = Object.values(completed).filter(Boolean).length;
-  const overallPercentage = Math.round((completedCount / totalTopics) * 100) || 0;
-
-  return (
-    <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} p-4 md:p-8`}>
-      <div className="max-w-4xl mx-auto space-y-6">
-        
-        {/* Top Controls */}
-        <div className="flex justify-end gap-3 mb-2">
-          <button 
-            onClick={resetProgress}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 transition-colors text-xs font-bold uppercase tracking-wider"
-          >
-            <RotateCcw size={14} />
-            Reset Data
-          </button>
-          <button 
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="p-2 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
-          >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-        </div>
-
-        {/* Header Dashboard */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-4">
-            <div className="bg-indigo-600 p-3 rounded-xl text-white shadow-md">
-              <Trophy size={32} />
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">SSC 2026 Prep Tracker</h1>
-              <p className="text-slate-500 dark:text-slate-400 font-medium">Your progress is automatically saved locally</p>
-            </div>
-          </div>
-          
-          <div className="flex flex-col items-center bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 px-6 py-4 rounded-xl shadow-inner">
-            <div className="flex items-center gap-2 text-rose-500 mb-1">
-              <CalendarClock size={20} />
-              <span className="font-semibold text-sm uppercase tracking-wider">Countdown</span>
-            </div>
-            <div className="text-3xl font-extrabold text-rose-600 dark:text-rose-500">
-              {daysLeft} <span className="text-lg font-bold text-rose-400 dark:text-rose-700">Days</span>
-            </div>
-            <p className="text-xs text-rose-400 dark:text-rose-800 mt-1">Until April 21st</p>
-          </div>
-        </div>
-
-        {/* Overall Progress */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-8">
-          <div className="flex justify-between items-end mb-4">
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 dark:text-white">Overall Mastery</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-                {completedCount} of {totalTopics} topics locked in
-              </p>
-            </div>
-            <span className="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">{overallPercentage}%</span>
-          </div>
-          <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-4 overflow-hidden shadow-inner">
-            <div 
-              className="bg-indigo-600 dark:bg-indigo-500 h-4 rounded-full transition-all duration-700 ease-out relative overflow-hidden"
-              style={{ width: `${overallPercentage}%` }}
-            >
-              <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]" style={{
-                backgroundImage: 'linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent)',
-                transform: 'skewX(-20deg)'
-              }} />
-            </div>
-          </div>
-        </div>
-
-        {/* Syllabus Accordion List */}
-        <div className="space-y-4">
-          {syllabusData.map((subject) => {
-            const isExpanded = expandedSubject === subject.id;
-            const progress = getSubjectProgress(subject);
-            const Icon = subject.icon;
+            if (!iconMarkup) return <span style={{ width: size, height: size, display: 'inline-block' }} />;
 
             return (
-              <div key={subject.id} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:shadow-md">
-                
-                {/* Accordion Header */}
-                <button 
-                  onClick={() => setExpandedSubject(isExpanded ? null : subject.id)}
-                  className="w-full px-6 py-5 flex items-center justify-between cursor-pointer select-none"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-xl ${subject.lightColor} ${subject.textColor}`}>
-                      <Icon size={24} />
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-lg font-bold text-slate-800 dark:text-white">{subject.title}</h3>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
-                          {progress.done} / {progress.total} done
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="hidden md:flex items-center gap-2">
-                      <span className="text-sm font-bold text-slate-700 dark:text-slate-300 w-10 text-right">{progress.percentage}%</span>
-                      <div className="w-24 bg-slate-100 dark:bg-slate-800 rounded-full h-2">
-                        <div 
-                          className={`${subject.color} ${subject.darkColor} h-2 rounded-full transition-all duration-500`}
-                          style={{ width: `${progress.percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="text-slate-400">
-                      {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-                    </div>
-                  </div>
-                </button>
-
-                {/* Accordion Body */}
-                <div 
-                  className={`border-t border-slate-100 dark:border-slate-800 transition-all duration-300 ease-in-out ${
-                    isExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
-                  } overflow-hidden bg-slate-50 dark:bg-slate-950/40`}
-                >
-                  <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {subject.topics.map((topic) => {
-                      const isDone = completed[topic.id];
-                      return (
-                        <div 
-                          key={topic.id}
-                          onClick={() => toggleTopic(topic.id)}
-                          className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-all duration-200 border ${
-                            isDone 
-                              ? 'bg-white dark:bg-slate-900 border-green-200 dark:border-green-900/50 shadow-sm opacity-80' 
-                              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-sm'
-                          }`}
-                        >
-                          <div className={`transition-colors duration-300 ${isDone ? 'text-green-500 dark:text-green-400' : 'text-slate-300 dark:text-slate-700'}`}>
-                            {isDone ? <CheckCircle2 size={22} className="fill-green-50 dark:fill-green-950/20" /> : <Circle size={22} />}
-                          </div>
-                          <span className={`flex-1 font-medium text-sm transition-colors duration-300 ${
-                            isDone ? 'text-slate-400 dark:text-slate-600 line-through' : 'text-slate-700 dark:text-slate-300'
-                          }`}>
-                            {topic.title}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={size}
+                    height={size}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={className}
+                    dangerouslySetInnerHTML={{ __html: iconMarkup }}
+                />
             );
-          })}
-        </div>
-        
-        {/* Footer info */}
-        <div className="text-center text-slate-400 dark:text-slate-600 text-xs py-8 uppercase tracking-widest font-bold">
-          SSC 2026 Revision System • Persistence Enabled
-        </div>
+        };
 
-      </div>
-      
-      <style>{`
-        @keyframes shimmer {
-          0% { left: -100%; }
-          100% { left: 100%; }
+        const syllabusData = [
+            { id: 'physics', title: 'Physics (136)', icon: 'Atom', color: 'bg-blue-500', darkColor: 'dark:bg-blue-600', lightColor: 'bg-blue-100 dark:bg-blue-900/30', textColor: 'text-blue-600 dark:text-blue-400', topics: [{id:'p1',title:'Physical Quantities'},{id:'p2',title:'Motion'},{id:'p3',title:'Force'},{id:'p4',title:'Work, Power, Energy'},{id:'p5',title:'Waves & Sound'},{id:'p6',title:'Reflection of Light'},{id:'p7',title:'Static Electricity'}] },
+            { id: 'chemistry', title: 'Chemistry (137)', icon: 'Beaker', color: 'bg-indigo-500', darkColor: 'dark:bg-indigo-600', lightColor: 'bg-indigo-100 dark:bg-indigo-900/30', textColor: 'text-indigo-600 dark:text-indigo-400', topics: [{id:'c1',title:'Structure of Matter'},{id:'c2',title:'Periodic Table'},{id:'c3',title:'Chemical Bonds'},{id:'c4',title:'Mole Concept'},{id:'c5',title:'Chemical Reactions'},{id:'c6',title:'Hydrocarbons'}] },
+            { id: 'hmath', title: 'Higher Math (126)', icon: 'Calculator', color: 'bg-purple-500', darkColor: 'dark:bg-purple-600', lightColor: 'bg-purple-100 dark:bg-purple-900/30', textColor: 'text-purple-600 dark:text-purple-400', topics: [{id:'hm1',title:'Algebraic Expressions'},{id:'hm2',title:'Infinite Series'},{id:'hm3',title:'Binomial Expansion'},{id:'hm4',title:'Trigonometry'},{id:'hm5',title:'Planar Vectors'},{id:'hm6',title:'Exponents & Logs'},{id:'hm7',title:'Coordinate Geometry'},{id:'hm8',title:'Probability'}] },
+            { id: 'gmath', title: 'General Math (109)', icon: 'Calculator', color: 'bg-pink-500', darkColor: 'dark:bg-pink-600', lightColor: 'bg-pink-100 dark:bg-pink-900/30', textColor: 'text-pink-600 dark:text-pink-400', topics: [{id:'gm1',title:'Sets & Functions'},{id:'gm2',title:'Algebraic Formulas'},{id:'gm3',title:'Geometry Theorems'},{id:'gm4',title:'Trigonometry Ratios'},{id:'gm5',title:'Ratios & Proportions'},{id:'gm6',title:'Mensuration'},{id:'gm7',title:'Statistics'}] },
+            { id: 'biology', title: 'Biology (138)', icon: 'Dna', color: 'bg-emerald-500', darkColor: 'dark:bg-emerald-600', lightColor: 'bg-emerald-100 dark:bg-emerald-900/30', textColor: 'text-emerald-600 dark:text-emerald-400', topics: [{id:'b1',title:'Intro & Taxonomy'},{id:'b2',title:'Cells & Tissues'},{id:'b3',title:'Cell Division'},{id:'b4',title:'Bioenergetics'},{id:'b5',title:'Reproduction'},{id:'b6',title:'Genetics'},{id:'b7',title:'Ecosystems'}] },
+            { id: 'bgs', title: 'BGS (150)', icon: 'Globe', color: 'bg-orange-500', darkColor: 'dark:bg-orange-600', lightColor: 'bg-orange-100 dark:bg-orange-900/30', textColor: 'text-orange-600 dark:text-orange-400', topics: [{id:'bgs1',title:'Independence of BD'},{id:'bgs2',title:'Solar System'},{id:'bgs3',title:'State & Law'},{id:'bgs4',title:'Economic Systems'},{id:'bgs5',title:'Economic Indicators'},{id:'bgs6',title:'Socialization'}] }
+        ];
+
+        function App() {
+            const [completed, setCompleted] = useState(() => {
+                const saved = localStorage.getItem('ssc_progress_2026');
+                return saved ? JSON.parse(saved) : {};
+            });
+            
+            const [isDarkMode, setIsDarkMode] = useState(() => {
+                return localStorage.getItem('ssc_theme') === 'dark';
+            });
+
+            const [expandedSubject, setExpandedSubject] = useState('physics');
+            const [daysLeft, setDaysLeft] = useState(0);
+
+            useEffect(() => {
+                localStorage.setItem('ssc_progress_2026', JSON.stringify(completed));
+            }, [completed]);
+
+            useEffect(() => {
+                localStorage.setItem('ssc_theme', isDarkMode ? 'dark' : 'light');
+                if (isDarkMode) document.documentElement.classList.add('dark');
+                else document.documentElement.classList.remove('dark');
+            }, [isDarkMode]);
+
+            useEffect(() => {
+                const examDate = new Date('2026-04-21T00:00:00');
+                const diff = Math.ceil((examDate - new Date()) / (1000 * 60 * 60 * 24));
+                setDaysLeft(diff > 0 ? diff : 0);
+            }, []);
+
+            const totalTopics = syllabusData.reduce((acc, sub) => acc + sub.topics.length, 0);
+            const completedCount = Object.values(completed).filter(Boolean).length;
+            const overallPercentage = Math.round((completedCount / totalTopics) * 100) || 0;
+
+            return (
+                <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} p-4 md:p-8`}>
+                    <div className="max-w-4xl mx-auto space-y-6">
+                        
+                        <div className="flex justify-end gap-3">
+                            <button onClick={() => { if(confirm('Clear all progress?')) setCompleted({}) }} className="text-[10px] font-bold uppercase tracking-widest bg-slate-200 dark:bg-slate-800 px-3 py-2 rounded-lg opacity-60 hover:opacity-100">Reset</button>
+                            <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-slate-200 dark:bg-slate-800 rounded-lg">
+                                <Icon name={isDarkMode ? "Sun" : "Moon"} size={18} />
+                            </button>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-indigo-600 p-3 rounded-xl text-white"><Icon name="Trophy" size={32} /></div>
+                                <div>
+                                    <h1 className="text-2xl font-bold dark:text-white">SSC 2026 Tracker</h1>
+                                    <p className="text-slate-500 text-sm">Progress saves locally in your browser</p>
+                                </div>
+                            </div>
+                            <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 px-6 py-3 rounded-xl text-center">
+                                <div className="text-rose-600 font-black text-2xl">{daysLeft} Days</div>
+                                <div className="text-[10px] uppercase font-bold text-rose-400">Until Exam</div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+                            <div className="flex justify-between mb-4"><span className="font-bold">Total Mastery</span><span className="font-black text-indigo-600">{overallPercentage}%</span></div>
+                            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
+                                <div className="bg-indigo-600 h-full transition-all duration-1000 relative" style={{width: `${overallPercentage}%`}}>
+                                    <div className="absolute inset-0 shimmer-effect w-full h-full animate-shimmer"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            {syllabusData.map(sub => {
+                                const done = sub.topics.filter(t => completed[t.id]).length;
+                                const perc = Math.round((done / sub.topics.length) * 100);
+                                return (
+                                    <div key={sub.id} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                                        <button onClick={() => setExpandedSubject(expandedSubject === sub.id ? null : sub.id)} className="w-full p-4 flex items-center justify-between">
+                                            <div className="flex items-center gap-4 text-left">
+                                                <div className={`p-2 rounded-lg ${sub.lightColor} ${sub.textColor}`}><Icon name={sub.icon} size={20} /></div>
+                                                <div>
+                                                    <div className="font-bold text-sm">{sub.title}</div>
+                                                    <div className="text-[10px] text-slate-500">{done}/{sub.topics.length} Topics</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-xs font-bold">{perc}%</span>
+                                                <Icon name={expandedSubject === sub.id ? "ChevronUp" : "ChevronDown"} size={16} />
+                                            </div>
+                                        </button>
+                                        {expandedSubject === sub.id && (
+                                            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-2 bg-slate-50/50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800">
+                                                {sub.topics.map(t => (
+                                                    <div key={t.id} onClick={() => setCompleted({...completed, [t.id]: !completed[t.id]})} className={`p-3 rounded-lg border cursor-pointer flex items-center gap-3 transition-all ${completed[t.id] ? 'bg-green-50/50 border-green-200 opacity-60' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'}`}>
+                                                        <Icon name={completed[t.id] ? "CheckCircle2" : "Circle"} size={18} className={completed[t.id] ? "text-green-500" : "text-slate-300"} />
+                                                        <span className={`text-xs font-medium ${completed[t.id] ? 'line-through text-slate-400' : ''}`}>{t.title}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
         }
-      `}</style>
-    </div>
-  );
-}
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
